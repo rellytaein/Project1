@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>My Web App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    #main {
+      font-size: 2em;
+      margin-bottom: 40px;
+    }
+
+    .top-right {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+
+    .box, .help-box {
+      margin: 10px auto;
+      padding: 20px;
+      width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    input {
+      width: 90%;
+      margin: 5px 0;
+      padding: 8px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-right">
+    <button onclick="showLogin()">로그인</button>
+    <button onclick="showRegister()">회원가입</button>
+  </div>
+
+  <div id="main">준비중</div>
+
+  <div id="loginForm" class="box hidden">
+    <h2>로그인</h2>
+    <input type="text" id="loginUsername" placeholder="아이디"><br>
+    <input type="password" id="loginPassword" placeholder="비밀번호"><br>
+    <button onclick="login()">로그인</button>
+    <p style="cursor:pointer; color:blue;" onclick="showLoginHelp()">로그인이 되지 않습니다</p>
+  </div>
+
+  <div id="loginHelp" class="help-box hidden">
+    <p><button onclick="alert('관리자에게 문의하세요')">아이디를 모르겠습니다</button></p>
+    <p><button onclick="alert('비밀번호 재설정 링크를 보내드립니다')">비밀번호를 모르겠습니다</button></p>
+  </div>
+
+  <div id="registerForm" class="box hidden">
+    <h2>회원가입</h2>
+    <input type="email" id="regEmail" placeholder="이메일"><br>
+    <input type="text" id="regUsername" placeholder="아이디"><br>
+    <input type="password" id="regPassword" placeholder="비밀번호"><br>
+    <input type="password" id="regPassword2" placeholder="비밀번호 확인"><br>
+    <button onclick="register()">회원가입 하기</button>
+  </div>
+
+  <script>
+    function hideAll() {
+      document.getElementById('main').classList.add('hidden');
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('loginHelp').classList.add('hidden');
+      document.getElementById('registerForm').classList.add('hidden');
+    }
+
+    function showLogin() {
+      hideAll();
+      document.getElementById('loginForm').classList.remove('hidden');
+    }
+
+    function showLoginHelp() {
+      document.getElementById('loginHelp').classList.remove('hidden');
+    }
+
+    function showRegister() {
+      hideAll();
+      document.getElementById('registerForm').classList.remove('hidden');
+    }
+
+    async function register() {
+      const email = document.getElementById('regEmail').value;
+      const username = document.getElementById('regUsername').value;
+      const password = document.getElementById('regPassword').value;
+      const password2 = document.getElementById('regPassword2').value;
+
+      if (!email || !username || !password || !password2) {
+        return alert('모든 항목을 입력하세요.');
+      }
+      if (password !== password2) {
+        return alert('비밀번호가 일치하지 않습니다.');
+      }
+
+      try {
+        const res = await fetch('http://localhost:3000/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, username, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('회원가입 성공!');
+        } else {
+          alert(`회원가입 오류: ${data.error}`);
+        }
+      } catch (err) {
+        alert('서버에 연결할 수 없습니다.');
+      }
+    }
+
+    async function login() {
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+
+      if (!username || !password) {
+        return alert('아이디와 비밀번호를 입력하세요.');
+      }
+
+      try {
+        const res = await fetch('http://localhost:3000/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert(`로그인 성공: ${data.user.username}님`);
+        } else {
+          alert(`로그인 실패: ${data.error}`);
+        }
+      } catch (err) {
+        alert('서버에 연결할 수 없습니다.');
+      }
+    }
+  </script>
+
+</body>
+</html>
